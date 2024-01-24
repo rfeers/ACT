@@ -66,10 +66,8 @@ def get_data(id: int, page : int = 1, limit: int = 40 ):
 
 # We generate a generator that will give us the payloads one by one. 
 def get_all_attractions(id: int, page: int) -> list:
-    print(id, page)
     while True:
         data = get_data(id, page)
-        print("jeje",data)
         product_count = data["data"]["attractionsProduct"]["searchProducts"]["filterStats"]["filteredProductCount"]
         print(product_count, page)
         yield data["data"]["attractionsProduct"]["searchProducts"]["products"]
@@ -80,7 +78,7 @@ def get_all_attractions(id: int, page: int) -> list:
 
 # Save all obtained data into a JSON
 def save_json(results, id):
-    with open(f'Booking/Files/attractions_{destination_id}.json','w') as jsonfile:
+    with open(f'Booking/Files/attractions_{id}.json','w') as jsonfile:
         json.dump(results, jsonfile, indent=4)
 
 
