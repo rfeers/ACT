@@ -89,10 +89,10 @@ if __name__ == "__main__":
     #group.add_argument('--destination_name', type=str, help='destination name')
     args = parser.parse_args()
 
-    products = []
+    results = []
 
     for products in get_all_attractions(id=int(args.destination_id), page = 1):
-        products.extend(products)
+        results.extend(products)
     #print(get_data(destination_id))
     save_json(products, id=args.destination_id)
 
