@@ -436,23 +436,28 @@ def get_data(geoId: int, page: int) -> dict:
 
 def get_all_attractions(geoId:int, page:int = 30):
     while True: 
-        data = get_data(geoId, page)
         
-        #product_count = data[-1]['data']['Result'][0]['additionalMapSections'][9]['totalResults']
-        product_count = 120
+        data = get_data(geoId, page)
+        #print(data)
+        try: 
+            product_count = data[-1]['data']['Result'][0]['additionalMapSections'][9]['totalResults']
+        except: 
+            break
+        #product_count = 120
         products = data[-1]['data']['Result'][0]['mapSections'][2]['cards']
-
+        pins = data[-1]['data']['Result'][0]['mapSections'][0]['pins']
+        #products = data[-1]['data']['Result'][0]['mapSections']
         print(product_count, page)
 
-        yield products
+        yield [products,pins]
         if page >= product_count:
             break
         page += 30
 
 
 # Save all obtained data into a JSON
-def save_json(results):
-    with open(f'TripAdvisor/Files/attractions.json','w') as jsonfile:
+def save_json(results: dict, PathName: str):
+    with open(f'TripAdvisor/Files/'+PathName+".json",'w') as jsonfile:
         json.dump(results, jsonfile, indent=4)
 
  
@@ -471,9 +476,12 @@ if __name__ == "__main__":
     group.add_argument('--destination_id', type=int, help='destination id')
     args = parser.parse_args()
 
-    results = []
+    cards = []
+    pins  = []
 
-    for products in get_all_attractions(cat_id, page = 0):
-        results.extend(products)
-    #print(get_data(destination_id))
-    save_json(results)
+    for product in get_all_attractions(cat_id, page = 8610):
+        cards.extend(product[0])
+        pins.extend(product[1])
+
+    save_json(cards, "Cards_all")
+    save_json(pins, "Pins_all")

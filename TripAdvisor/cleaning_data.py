@@ -1,49 +1,85 @@
 from getting_data import *
+from datetime import datetime
 import json
 import csv
 
-# Replace 'your_file.json' with the path to your JSON file
-file_path = "TripAdvisor/Files/attractions.json"
+def cleaning_data():
+    # Replace 'your_file.json' with the path to your JSON file
+    cards_file_path = "TripAdvisor/Files/Cards_all.json"
+    pins_file_path = "TripAdvisor/Files/Pins_all.json"
 
-# Reading the JSON data into a Python dictionary
-with open(file_path, 'r') as file:
-    data = json.load(file)
+    # Reading the JSON data into a Python dictionary
+    with open(cards_file_path, 'r') as file:
+        cards = json.load(file)
 
-#print(data[0].keys())
+    with open(pins_file_path, 'r') as file:
+        pins = json.load(file)
 
-#print("Id: ", data[0]["saveId"])
-#print("Name: ", data[0]["cardTitle"]["text"])
-#print("Tag: ", data[0]["primaryInfo"]["text"])
-#print("merchandisingText: ", data[0]["merchandisingText"]["text"])
-#print("Rating: ", data[0]["bubbleRating"]["rating"])
-#print("Reviews: ", data[0]["bubbleRating"]["numberReviews"]["text"])
+    date = datetime.now().date()
 
-#print(data[0]["labels"])
+    # Generating a CSV file with all the info
+    with open('TripAdvisor/Files/'+date+'_attractions.csv', 'w', encoding = 'utf-8-sig') as csvfile:
+        fieldnames = [
+            'Id',
+            'Name', 
+            'Rating', 
+            'Reviews',
+            'Tag',
+            'merchandisingText', 
+            'latitude',
+            'longitude', 
+            "Scraping_date"
+        ]
+        # Generate the writer object
+        writer = csv.DictWriter(csvfile, fieldnames = fieldnames)
+        writer.writeheader()
+
+        # Iterate over all products
+        for ii in range(len(cards)):
+            product = cards[ii]            
+            #print(ii)
+            pin = pins[ii]
+            #print("product: ", product["saveId"]["id"], "pin: ", pin["saveId"]["id"])
+            #print(product.get("merchandisingText",None))
+            
+            #print(product.get("bubbleRating", {} ))
+
+            try:
+                # Attempt to extract the rating
+                rating = product["bubbleRating"]["rating"]
+                reviews = product["bubbleRating"]["numberReviews"]["text"]
+            except (KeyError, TypeError):
+                # Set to None if the path does not exist or if an intermediate step is None
+                rating = None
+                reviews = None
+    
+            try:
+                # Attempt to extract the rating
+                tag = product["primaryInfo"]["text"]
+                
+            except (KeyError, TypeError):
+                # Set to None if the path does not exist or if an intermediate step is None
+                tag = None
+    
+            try:
+                # Attempt to extract the rating
+                merchandisingText = product["merchandisingText"]["text"]
+                
+            except (KeyError, TypeError):
+                # Set to None if the path does not exist or if an intermediate step is None
+                merchandisingText = None
 
 
-# We start persisting our data in CSV-format
-with open('attractions.csv', 'w', encoding = 'utf-8-sig') as csvfile:
-    fieldnames = [
-        'Id',
-        'Name', 
-        'Rating', 
-        'Reviews',
-        'Tag',
-        'merchandisingText'
-    ]
-    # Generate the writer object
-    writer = csv.DictWriter(csvfile, fieldnames = fieldnames)
-    writer.writeheader()
-
-    # Iterate over all products
-    for product in data:
-        print(type(product))
-        row = {
-                'Id':product["saveId"],
-                'Name':product["cardTitle"]["text"],
-                'Rating':product["bubbleRating"]["rating"], 
-                #'Reviews': product.get("numberReviews", None)["text"],
-                'Tag':  product["primaryInfo"]["text"],
-                #'merchandisingText': product["merchandisingText"]["text"]
-            }
-        writer.writerow(row)
+            row = {
+                    'Id':product["saveId"]["id"],
+                    'Name':product["cardTitle"]["text"],
+                    'Rating': rating,
+                    'Reviews': reviews,
+                    'Tag':  tag,
+                    'latitude': pin["geoPoint"]["latitude"],
+                    'longitude': pin["geoPoint"]["longitude"],
+                    'merchandisingText': merchandisingText,
+                    'Scraping_date': datetime.now().date()
+                    
+                }
+            writer.writerow(row)
