@@ -69,7 +69,8 @@ def get_all_attractions(id: int, page: int) -> list:
     while True:
         data = get_data(id, page)
         product_count = data["data"]["attractionsProduct"]["searchProducts"]["filterStats"]["filteredProductCount"]
-        print(product_count, page)
+        ufi = data["data"]["attractionsProduct"]["searchProducts"]["products"][0]["ufi"]
+        print(ufi, product_count, page)
         yield data["data"]["attractionsProduct"]["searchProducts"]["products"]
 
         if page * 40 > product_count:
